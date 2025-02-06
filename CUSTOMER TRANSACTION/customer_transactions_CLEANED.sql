@@ -1,0 +1,200 @@
+SELECT *
+FROM customer_transactions;
+
+-- CREATING NEW TABLE FOR DATA CLEANING
+CREATE TABLE `customer_transactions_U` (
+  `transaction_id` text,
+  `customer_name` text,
+  `email` text,
+  `phone_number` text,
+  `transaction_date` text,
+  `amount` text,
+  `status` text,
+  `payment_method` text,
+  `shipping_address` text,
+  `product_id` text,
+  `quantity` text,
+  `discount` text,
+  `total_amount` text,
+  `R_NO` INT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+SELECT *
+FROM customer_transactions_U;
+
+-- INSERTING DATA INTO NEW TABLE
+-- FINDING DUPLICATES USING ROW NUMBER
+INSERT INTO CUSTOMER_TRANSACTIONS_U
+SELECT *,
+row_number() OVER(PARTITION BY TRANSACTION_ID,CUSTOMER_NAME,
+					EMAIL,PHONE_NUMBER,TRANSACTION_DATE,AMOUNT,
+                    `STATUS`,PAYMENT_METHOD,SHIPPING_ADDRESS,
+                    PRODUCT_ID,QUANTITY,DISCOUNT,TOTAL_AMOUNT) AS R_NO
+FROM customer_transactions;
+
+-- FILTERING DUPLICATES
+SELECT *
+FROM CUSTOMER_TRANSACTIONS_U
+WHERE R_NO>1;
+
+SELECT *
+FROM CUSTOMER_TRANSACTIONS_U
+WHERE customer_name='JANE SMITH';
+
+-- DELETING DUPLICATES
+DELETE 
+FROM CUSTOMER_TRANSACTIONS_U
+WHERE R_NO>1;
+
+-- STANDARDISING DATA
+
+SELECT DISTINCT(CUSTOMER_NAME)
+FROM CUSTOMER_TRANSACTIONS_U
+ORDER BY 1;
+
+UPDATE CUSTOMER_TRANSACTIONS_U
+SET CUSTOMER_NAME = UPPER(TRIM(CUSTOMER_NAME));
+
+SELECT DISTINCT(`STATUS`)
+FROM CUSTOMER_TRANSACTIONS_U
+ORDER BY 1;
+
+SELECT *
+FROM CUSTOMER_TRANSACTIONS_U
+WHERE `STATUS` LIKE 'COMPLETE%';
+
+-- STANDARDISING STATUS COLUMN
+UPDATE CUSTOMER_TRANSACTIONS_U
+SET `STATUS`='COMPLETED'
+WHERE `STATUS` LIKE 'COMPLETE%';
+
+SELECT DISTINCT(payment_method)
+FROM CUSTOMER_TRANSACTIONS_U
+ORDER BY 1;
+
+SELECT *
+FROM CUSTOMER_TRANSACTIONS_U
+WHERE payment_method LIKE 'C%';
+
+-- STANDARDISING PAYMENT METHOD COLUMN
+UPDATE CUSTOMER_TRANSACTIONS_U
+SET PAYMENT_METHOD ='CREDIT CARD'
+WHERE PAYMENT_METHOD LIKE 'C%';
+
+SELECT distinct(PRODUCT_ID)
+FROM CUSTOMER_TRANSACTIONS_U;
+
+SELECT * 
+FROM CUSTOMER_TRANSACTIONS_U
+WHERE product_id ='';
+
+SELECT SUM(AMOUNT),COUNT(AMOUNT),AVG(AMOUNT),MAX(AMOUNT),MIN(AMOUNT)
+FROM CUSTOMER_TRANSACTIONS_U;
+
+-- CLEANING UNWANTED SYMBOLS AND TEXTS FROM AMOUNT AND TOTAL AMOUNT COLUMN
+UPDATE customer_transactions_u
+SET AMOUNT=REPLACE(AMOUNT,'$','');
+
+UPDATE customer_transactions_u
+SET AMOUNT=
+		CASE
+			WHEN AMOUNT='ONE HUNDRED' THEN
+				'100.00'
+			ELSE
+			AMOUNT
+		END;
+
+-- CHANGING DATA TYPE
+ALTER TABLE customer_transactions_u
+MODIFY COLUMN AMOUNT DECIMAL(10,2);
+
+UPDATE customer_transactions_u
+SET TOTAL_AMOUNT=REPLACE(TOTAL_AMOUNT,'$','');
+
+ALTER TABLE customer_transactions_u
+MODIFY COLUMN TOTAL_AMOUNT DECIMAL(10,2);
+
+SELECT QUANTITY
+FROM customer_transactions_u;
+
+-- REMOVING TEXT FROM QUANTITY COLUMN
+UPDATE customer_transactions_u
+SET QUANTITY=CASE
+				WHEN QUANTITY='TWO' THEN '2'
+				ELSE QUANTITY
+			END;
+
+ALTER TABLE customer_transactions_u
+MODIFY COLUMN QUANTITY INT;
+
+-- CLEANIG AND STANDARDISING DISCOUNT COLUMN
+SELECT DISCOUNT
+FROM customer_transactions_u;
+
+UPDATE customer_transactions_u
+SET DISCOUNT=REPLACE(DISCOUNT,'%','');
+
+SELECT DISCOUNT,
+CASE
+		WHEN DISCOUNT<1 THEN
+			(DISCOUNT*100)
+        ELSE DISCOUNT
+END AS NEW_DISC
+FROM customer_transactions_u;
+
+UPDATE customer_transactions_u
+SET DISCOUNT=CASE
+			WHEN DISCOUNT<1 THEN
+				(DISCOUNT*100)
+			ELSE DISCOUNT
+            END;
+
+ALTER TABLE CUSTOMER_TRANSACTIONS_U
+MODIFY COLUMN DISCOUNT INT;
+
+UPDATE customer_transactions_u
+SET PAYMENT_METHOD=UPPER(PAYMENT_METHOD);
+
+UPDATE customer_transactions_u
+SET `STATUS` =UPPER(`STATUS`);
+
+SELECT TRANSACTION_DATE
+FROM customer_transactions_u;
+
+-- RECTIFYING DATE FORMATS
+SELECT transaction_date,
+	CASE
+		WHEN transaction_date LIKE '%/%/%' THEN
+			STR_TO_DATE(transaction_date,'%m/%d/%Y')
+		WHEN transaction_date LIKE '%-%-%' THEN
+			CASE
+				WHEN SUBSTRING(transaction_date,6,2)BETWEEN '01' AND'12' THEN
+					STR_TO_DATE(transaction_date,'%Y-%m-%d')
+				ELSE 
+					str_to_date(transaction_date,'%Y-%d-%m')
+			END
+		ELSE NULL
+	END AS NEW_DATE
+FROM customer_transactions_u;
+
+UPDATE customer_transactions_u
+SET transaction_date=CASE
+		WHEN transaction_date LIKE '%/%/%' THEN
+			STR_TO_DATE(transaction_date,'%m/%d/%Y')
+		WHEN transaction_date LIKE '%-%-%' THEN
+			CASE
+				WHEN SUBSTRING(transaction_date,6,2)BETWEEN '01' AND'12' THEN
+					STR_TO_DATE(transaction_date,'%Y-%m-%d')
+				ELSE 
+					str_to_date(transaction_date,'%Y-%d-%m')
+			END
+		ELSE NULL
+	END;
+
+-- DROPPING UNNESSECARY COLUMNS
+ALTER TABLE customer_transactions_u
+DROP COLUMN R_NO;
+
+-- CLEANED DATA
+SELECT *
+FROM customer_transactions_u;
