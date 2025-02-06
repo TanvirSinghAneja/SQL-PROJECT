@@ -1,0 +1,6 @@
+listing_id,address,price,sq_ft,status
+L001,123 Main St,"$250,000",1500,For Sale
+L002,456 Elm St,300000,2000,SOLD
+L003,789 Oak St,two fifty,NULL,for sale
+L004,101 Maple Ave,"400,000",2500,Pending
+L002,456 Elm St,300000,2000,SOLD
