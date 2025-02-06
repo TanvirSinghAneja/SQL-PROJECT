@@ -1,0 +1,6 @@
+application_id,applicant_name,dob,loan_amount,status,credit_score
+A001,Alice Brown,1985-03-10,$5000,Approved,720
+A002,Bob Smith,1990/05/21,10000,Pending,650
+A003,Charlie Johnson,1992-06-30,fifteen thousand,DECLINED,NULL
+A004,Diana Ross,1988-11-15,20000,approved,780
+A002,Bob Smith,1990/05/21,10000,Pending,650
