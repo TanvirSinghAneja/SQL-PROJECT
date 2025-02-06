@@ -1,0 +1,6 @@
+transaction_id,customer_name,email,phone_number,transaction_date,amount,status,payment_method,shipping_address,product_id,quantity,discount,total_amount
+001,JOHN DOE,johndoe@email.com,123-456-7890,2023-01-15,$100.00,Completed,Credit Card,123 Main St,P001,two,10%,$180
+002,jane smith,janesmith@email,1234567890,01/16/2023,200,complete,paypal,456 Elm St,P002,3.0,0.05,570
+003,Mike O'Neil,mike@email.com,(555)555-5555,2023-17-01,one hundred,Pending,CC,,P003,03,,300
+004,Alex Brown,alexbrown@email.com,9876543210,2023-01-18,150.50,PENDING,credit_card,789 Oak St,,1,0.1,$135.45
+002,jane smith,janesmith@email,1234567890,01/16/2023,200,complete,paypal,456 Elm St,P002,3.0,0.05,570
